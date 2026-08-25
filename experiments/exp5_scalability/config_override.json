@@ -1,0 +1,14 @@
+{
+  "_note": "Exp5: scalability along cluster size, model depth, request length.",
+  "sweeps": {
+    "N_cluster": {
+      "4": "1,1,2", "6": "1,2,3", "8": "1,3,4", "10": "2,3,5", "12": "2,4,6"
+    },
+    "model_name": ["gemma3-4b", "llama-3.2-8b", "qwen3-14b"],
+    "G_hat": [256, 1024, 2048, 4096]
+  },
+  "regime": "default",
+  "n_traces": 20,
+  "seed_start": 42,
+  "purpose": "Three line plots: TTLT vs N, DP cost vs L, relative improvement vs G_hat"
+}

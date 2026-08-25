@@ -1,0 +1,13 @@
+{
+  "_note": "Exp3: 4 regimes × 5 schemes.",
+  "regimes": ["R1_calibrated", "R2_thermal", "R3_workload", "R4_network"],
+  "schemes": ["SDA", "RT", "FM", "DACI", "OR"],
+  "n_traces": 20,
+  "seed_start": 42,
+  "representative_trace": {
+    "regime": "R2_thermal",
+    "seed": 42,
+    "log_level": "full"
+  },
+  "purpose": "Figure 4-panel bar (TTLT by regime×scheme) + R2 line plot + Table 4"
+}

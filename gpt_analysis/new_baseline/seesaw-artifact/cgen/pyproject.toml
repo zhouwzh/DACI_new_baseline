@@ -1,0 +1,26 @@
+[build-system]
+requires = [
+    "setuptools==69.5.1",
+    "packaging",
+    "wheel",
+    "torch==2.4.0"
+    ]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cgen"
+requires-python = ">= 3.10"
+dependencies = [
+    "torch==2.4.0", "transformers>=4.24", "loguru", "vllm==0.5.5",
+    "pydantic", "wheel"
+]
+dynamic = ["version"]
+
+[tool.setuptools.packages.find]
+include = ["cgen*"]
+
+[tool.wheel]
+include = ["cgen*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "cgen.__version__"}

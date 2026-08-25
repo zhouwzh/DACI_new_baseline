@@ -1,0 +1,15 @@
+{
+  "_note": "Exp2: ablation of DACI components.",
+  "regime": "default",
+  "schemes": ["DACI"],
+  "variants": [
+    {"label": "full", "ablation": "none"},
+    {"label": "no_predictor", "ablation": "no_predictor"},
+    {"label": "no_lazy", "ablation": "no_lazy"},
+    {"label": "no_bottleneck", "ablation": "no_bottleneck"},
+    {"label": "no_adaptive_H", "ablation": "no_adaptive_H"}
+  ],
+  "n_traces": 20,
+  "seed_start": 42,
+  "purpose": "Figure: 4-panel (TTLT / #Reconf / Ovhd / P99 TPOT) x 5 variants"
+}

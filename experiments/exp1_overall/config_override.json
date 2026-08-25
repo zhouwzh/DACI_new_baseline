@@ -1,0 +1,15 @@
+{
+  "_note": "Exp1 uses default configs. This file documents what's being tested; actual overrides are via CLI in run.sh.",
+  "regime": "default",
+  "schemes": ["SDA", "RT", "FM", "DACI", "OR"],
+  "n_traces": 20,
+  "seed_start": 42,
+  "model_name": "gemma3-4b",
+  "cluster": {"high": 1, "mid": 3, "low": 4},
+  "algo_overrides": {
+    "W_tokens": 20,
+    "H_max": 8,
+    "lambda_slack": 0.0
+  },
+  "purpose": "Table 3 — overall TTLT / TTFT / P99 TPOT / Ovhd comparison"
+}
