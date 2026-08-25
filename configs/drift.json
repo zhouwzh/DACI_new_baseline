@@ -1,0 +1,142 @@
+{
+  "_comment": "Ground-truth drift simulator params. Workload split into compute (FLOPs/sec) and memory (bytes) per Sec.5.2.3 updated.",
+  "workload": {
+    "_comment": "Per-tier workload distributions. Higher tier = more/heavier jobs.",
+    "duration_lognormal_mu_log": 1.6,
+    "duration_lognormal_sigma": 0.5,
+    "obs_noise_rel_std": 0.03,
+    "per_tier": {
+      "high": {
+        "lambda_job_per_sec_range": [
+          0.5,
+          0.8
+        ],
+        "cmp_intensity_frac_of_mu_range": [
+          0.2,
+          0.5
+        ],
+        "mem_footprint_gb_range": [
+          0.5,
+          3.0
+        ]
+      },
+      "mid": {
+        "lambda_job_per_sec_range": [
+          0.2,
+          0.4
+        ],
+        "cmp_intensity_frac_of_mu_range": [
+          0.1,
+          0.3
+        ],
+        "mem_footprint_gb_range": [
+          1.0,
+          2.0
+        ]
+      },
+      "low": {
+        "lambda_job_per_sec_range": [
+          0.1,
+          0.2
+        ],
+        "cmp_intensity_frac_of_mu_range": [
+          0.05,
+          0.15
+        ],
+        "mem_footprint_gb_range": [
+          0.2,
+          0.8
+        ]
+      }
+    },
+    "_dead_sampling_hz": 1.0,
+    "_dead_q_cap": 1.0,
+    "_dead_note": "sampling_hz and q_cap were never read. Sampling is driven by thermal.T_W_sec and the workload superposition is uncapped."
+  },
+  "network": {
+    "_comment": "Hockney alpha-beta. alpha in seconds, beta in seconds/byte. THIS IS THE LIVE PAIR: drift_gt.observed_sensor builds link_obs from it, and every DP and cost path reads link_obs. cluster.baseline_link is NOT consulted -- see cluster.py.",
+    "alpha_normal_s": 0.0004871,
+    "beta_normal_s_per_byte": 9.126e-09,
+    "degraded_inflation_range": [
+      2.0,
+      3.0
+    ],
+    "p_normal_self": 0.998,
+    "p_degraded_self": 0.95,
+    "ar1_persistence": 0.95,
+    "ar1_std_frac": 0.03,
+    "_measured": {
+      "where": "testbed",
+      "hardware": "2x Jetson Orin Nano 8GB, 25W MAXQ, dedicated 1 GbE (192.168.50.0/24, MTU 1500, no switch), swap off",
+      "method": "active probe over edgecolab.transport, framed tensors, the path the migration channel uses; median of 30-40 round trips per size; alpha and beta fitted in separate regimes. tools/measure_link.py",
+      "alpha_s_mean": 0.0004871,
+      "alpha_s_stdev": 4.4e-05,
+      "alpha_s_runs": [
+        0.0004285,
+        0.0005337,
+        0.0004659,
+        0.0004802,
+        0.0005274
+      ],
+      "alpha_spread_pct": 9.0,
+      "beta_s_per_byte_mean": 9.126e-09,
+      "beta_s_per_byte_stdev": 2.3e-12,
+      "beta_spread_pct": 0.03,
+      "_alpha_is_not_a_link_property": "About 174 us of the 487 us alpha is SENDER-SIDE: 137 us CUDA D2H synchronisation (flat across a 16x payload range, so latency not bandwidth) plus ~37 us of host copy, syscalls and header packing. The remainder is wire plus the receiver's ingress path. A CPU-only node would show a different alpha on the same wire.",
+      "_homogeneity_assumption": "FIRST APPROXIMATION. This pair is Jetson<->Jetson over GbE with THIS transport. The simulator applies one link constant uniformly across an 8-node AGX/NX/Nano cluster, but since a third of alpha is sender-side software and CUDA sync, a different node class genuinely has a different alpha on the same wire -- and alpha_ij is properly per-directed-pair. Adequate for a homogeneous-tier study; revisit before any heterogeneous claim.",
+      "_previous_values": {
+        "alpha_normal_s": 0.002,
+        "beta_normal_s_per_byte": 2e-09,
+        "note": "Simulator OVERSTATED alpha 4.11x and UNDERSTATED beta 4.56x. Opposite directions, and they do not cancel because they dominate at different payload sizes: decode hidden state is alpha-dominated (sim overstated ~3.5-3.8x) while a 16 MiB KV migration is beta-dominated (sim understated ~4.3x)."
+      },
+      "_paper_5_1_3_says": {
+        "alpha_s": 0.0003,
+        "beta_s_per_byte": 1e-09,
+        "note": "Neither matches the code that produced Table 3. A reproducibility defect independent of accuracy. Note the irony: the paper's stated 300 us is CLOSER to the measured 487 us than the code's 2000 us was -- the text was roughly right and the implementation drifted away from it."
+      }
+    },
+    "_degraded_UNMEASURED": "degraded_inflation_range is UNMEASURED. It scales the measured normal pair by 2x-3x per the paper's degraded-link description. No degraded link has been measured on the testbed; a congested or contended link may inflate alpha and beta by different factors rather than a common one."
+  },
+  "thermal": {
+    "_comment": "Asymmetric heating/cooling time constants per tier. GT uses asymmetric; Kalman uses symmetric harmonic mean tau_bar.",
+    "initial_noise_std_c": 1.0,
+    "_dead_use_asymmetric_tau": true,
+    "_dead_note": "use_asymmetric_tau was never read: tau_bar is ALWAYS the harmonic mean of tau_up and tau_down (cluster.Node.tau_bar_s), so the asymmetry is unconditionally collapsed regardless of this flag."
+  },
+  "regime": {
+    "_comment": "Drift regime toggles. 'default' activates all; others per Sec.5.3.",
+    "active": "default",
+    "default": {
+      "workload_active": true,
+      "thermal_active": true,
+      "network_active": true,
+      "nu_multiplier": 3.0
+    },
+    "R1_calibrated": {
+      "workload_active": false,
+      "thermal_active": false,
+      "network_active": false
+    },
+    "R2_thermal": {
+      "workload_active": true,
+      "thermal_active": true,
+      "network_active": false,
+      "nu_multiplier": 5.0,
+      "theta_th_override": 50.0
+    },
+    "R3_workload": {
+      "workload_active": true,
+      "thermal_active": false,
+      "network_active": false,
+      "psi_override": 0.95,
+      "sigma_eta_sq_override": 0.01
+    },
+    "R4_network": {
+      "workload_active": false,
+      "thermal_active": false,
+      "network_active": true,
+      "beta_doubling": true,
+      "degraded_links": 2
+    }
+  }
+}

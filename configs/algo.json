@@ -1,0 +1,43 @@
+{
+  "_comment": "DACI controller hyperparameters (Sec.4 & 5.2.4).",
+  "window": {
+    "W_tokens": 20,
+    "H_max": 8,
+    "tau_variance": 0.15
+  },
+  "stage_range": {
+    "S_min": 2,
+    "S_max": 5
+  },
+  "switching": {
+    "lambda_slack": 4.0,
+    "_comment_lambda": "lambda=0 gives pure lazy switching Eq.(20). lambda>0 is robust variant."
+  },
+  "predictor": {
+    "kalman": {
+      "_comment": "Uses zeta = 1 - exp(-T_W/tau_bar) where tau_bar is harmonic mean of tau_up, tau_down. Process noise var = sigma_v_sq (paper Eq.11).",
+      "init_P_var": 1.0
+    },
+    "ar1": {
+      "_comment": "Two independent AR(1) channels per node: 'cmp' (FLOPs/sec) and 'mem' (bytes). RLS sliding window refines each online.",
+      "rls_window_size": 30,
+      "warm_start_cmp": {
+        "mu_frac_of_cap": 0.2,
+        "psi": 0.85,
+        "sigma_eta_sq_rel": 0.01
+      },
+      "warm_start_mem": {
+        "mu_gb": 1.0,
+        "psi": 0.85,
+        "sigma_eta_sq_gb_sq": 0.25
+      }
+    },
+    "adaptive_horizon": {
+      "enabled": true,
+      "min_horizon": 1
+    }
+  },
+  "dp": {
+    "max_boundary_shift": 4
+  }
+}

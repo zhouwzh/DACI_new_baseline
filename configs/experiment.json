@@ -1,0 +1,117 @@
+{
+  "_comment": "Experiment-level settings.",
+  "request": {
+    "P_prompt_tokens": 512,
+    "G_hat_tokens": 15000
+  },
+  "schemes": [
+    "SDA",
+    "RT",
+    "FM",
+    "DACI",
+    "OR"
+  ],
+  "_schemes_full": [
+    "SDA",
+    "RT",
+    "FM",
+    "DACI",
+    "OR"
+  ],
+  "n_traces": 10,
+  "seed_base": 42,
+  "model_name": "qwen3-14b",
+  "cluster": {
+    "_comment": "Tier mix per Sec. 5.2.1. Total N=8.",
+    "high": 1,
+    "mid": 3,
+    "low": 4
+  },
+  "rt_baseline": {
+    "trigger_ratio": 1.2,
+    "cool_down_windows": 50
+  },
+  "output_dir": "outputs",
+  "_cluster_fixtures": {
+    "_comment": "Named fixtures; `cluster` selects the active mix.",
+    "paper_8node": {
+      "high": 1,
+      "mid": 3,
+      "low": 4
+    },
+    "testbed_n2": {
+      "high": 0,
+      "mid": 0,
+      "low": 2,
+      "_comment": "The physical testbed: two Orin Nanos, N=2, S=2, one boundary. Both are 'low' tier -- Orin Nano is exactly what that tier describes. The 8-node mix no longer describes anything runnable, so predicted-vs-measured needs this fixture."
+    }
+  },
+  "_dead_logging": {
+    "per_window_dump": true,
+    "dump_fields": [
+      "b",
+      "a",
+      "phi_hat",
+      "theta_gt",
+      "q_gt",
+      "H_r_star",
+      "omega_b",
+      "accepted",
+      "tpot_window",
+      "J_tilde"
+    ],
+    "_note": "Never read. run.py always writes per-window JSONL and ignores dump_fields, so this describes behaviour it does not control."
+  },
+  "controller_cost": {
+    "enabled": false,
+    "_comment": "Per-window wall-clock cost of the controller's OWN optimisation, charged to TTLT. The simulator charges Omega for migration and zero for deciding, which is not neutral between schemes: FM enumerates ordered placements with a surrogate evaluation each, every window, while DACI runs one boundary DP with placement frozen. Default OFF so the uncharged arm stays reproducible.",
+    "_statistic": "MEAN, not median. The quantity being accumulated is R x per-window cost over hundreds of windows, so the mean is the correct statistic. It matters for RT, whose distribution is bimodal -- it only searches when triggered -- with a 2.37 ms median against a 30.72 ms mean at N=8.",
+    "_provenance": {
+      "measured_by": "Distributed_LLM/tools/bench_controller.py",
+      "hardware": "Jetson Orin Nano 8GB, 25W MAXQ, Cortex-A78AE, taskset -c 0 (the controller runs on one core of N_0)",
+      "date_utc": "2026-07-28",
+      "note": "Pure computation: no ring, no weights. Same code path the simulator runs, timed on the hardware that would run it."
+    },
+    "table_ms": {
+      "N8_S5": {
+        "_config": "N=8, S=5, L=40 (qwen3-14b), W=20; the initial DP chose S=5, so FM enumerates P(8,5)=6720 placements",
+        "_median_ms": {
+          "SDA": 2.182,
+          "DACI": 7.341,
+          "FM": 67.655,
+          "RT": 2.368
+        },
+        "_p99_ms": {
+          "SDA": 2.413,
+          "DACI": 11.212,
+          "FM": 203.201,
+          "RT": 212.164
+        },
+        "SDA": 2.092,
+        "DACI": 7.471,
+        "FM": 81.381,
+        "RT": 30.72
+      },
+      "N2_S2": {
+        "_config": "N=2, S=2, L=28 (llama-3.2-3b), W=20; the testbed. P(2,2)=2, so FM's enumeration is trivial and there is no feasibility gap here.",
+        "_median_ms": {
+          "SDA": 0.657,
+          "DACI": 3.005,
+          "FM": 3.297,
+          "RT": 3.007
+        },
+        "_p99_ms": {
+          "SDA": 0.815,
+          "DACI": 3.463,
+          "FM": 3.72,
+          "RT": 3.217
+        },
+        "SDA": 0.654,
+        "DACI": 3.017,
+        "FM": 3.307,
+        "RT": 2.964
+      }
+    },
+    "_default_off_note": "Left OFF in the committed config so the AFTERC arm stays reproducible. The CTRL30 runs set it True on the command line path; see results/m5a_fixes/ for the charged arm."
+  }
+}

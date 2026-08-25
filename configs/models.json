@@ -1,0 +1,49 @@
+{
+  "_comment": "Per-model block-level quantities (Table 2, updated). Uniform decoder blocks; embedding at N_0, LM head at a_S (not counted in per-block weight).",
+  "models": {
+    "gemma3-4b": {
+      "L": 34,
+      "d": 2560,
+      "omega_model_gb": 8,
+      "chi_unit_model_kb_per_token": 136
+    },
+    "qwen3-14b": {
+      "L": 40,
+      "d": 5120,
+      "omega_model_gb": 29.6,
+      "chi_unit_model_kb_per_token": 160
+    },
+    "llama-3-8b": {
+      "L": 32,
+      "d": 4096,
+      "omega_model_gb": 16.1,
+      "chi_unit_model_kb_per_token": 128,
+      "_renamed_from": "llama-3.2-8b -- a model that does not exist. Llama-3.2 ships 1B, 3B and the 11B/90B vision models, no 8B. L=32, d=4096 with 8 KV heads at head_dim 128 (chi 128 KB/token) is Meta-Llama-3-8B's shape, which Llama-3.1-8B shares exactly -- the simulator uses only L, d, omega and chi, so it cannot distinguish them. Table 3's 'Llama-3-8B' label was correct and the config key was wrong."
+    },
+    "llama-3.2-1b": {
+      "L": 16,
+      "d": 2048,
+      "omega_model_gb": 2.47,
+      "chi_unit_model_kb_per_token": 32,
+      "_derivation": "16 layers x 8 KV heads x 64 head_dim x 2 (K and V) x 2 B (bf16) = 2048 B/layer/token; x16 = 32 KB/token. MEASURED on hardware: M3's migration test reports exactly 2048 B/block/token.",
+      "_calibrated": "Runtime-measured point, not extrapolated. Testbed TPOT 129.7 ms at S=2 across two Orin Nanos."
+    },
+    "llama-3.2-3b": {
+      "L": 28,
+      "d": 3072,
+      "omega_model_gb": 6.4,
+      "chi_unit_model_kb_per_token": 112,
+      "_derivation": "28 layers x 8 KV heads x 128 head_dim x 2 x 2 B = 4096 B/layer/token; x28 = 112 KB/token.",
+      "_calibrated": "Runtime-measured point. Residency predicted 3602 MB vs measured 3608 MB per stage (0.2%). Testbed TPOT 182.7 ms at S=2. Does NOT fit on one 8 GB board -- the single-process reference is OOM-killed."
+    }
+  },
+  "default_model": "gemma3-4b",
+  "_flops_formula_DOC": {
+    "_comment": "Per-block FLOPs. kappa_pf = 2*P*d^2 + 2*P^2*d (FFN + attn); kappa_dec = 2*d^2 + 4*d*(P+t) (FFN + attn over KV). P is prompt length, t is current decode step.",
+    "kappa_pf_const": 2,
+    "kappa_pf_attn": 2,
+    "kappa_dec_const": 2,
+    "kappa_dec_attn": 4,
+    "_note": "DOCUMENTATION ONLY -- never read. The formulas are hardcoded in src/model_spec.py (kappa_pf_per_block, kappa_dec_per_block). Kept because they are the paper's Table 2, but renamed so nobody edits them expecting an effect. If these and model_spec.py ever disagree, model_spec.py is what ran."
+  }
+}

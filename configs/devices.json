@@ -1,0 +1,63 @@
+{
+  "_comment": "Per-tier baseline parameters (Table 1, updated). mu_n is the BASELINE EFFECTIVE compute rate (TFLOPS), already accounting for realistic achievable throughput. delta_n removed: memory drift now uses m_n^r = m_n - q_mem directly. Kalman process noise and sensor noise are both sigma_v^2.",
+  "tiers": {
+    "high": {
+      "prototype": "Orin AGX",
+      "count": 1,
+      "mu_baseline_tflops": 1.64,
+      "m_gb": 32.0,
+      "B_load_gbps": 1.5,
+      "gamma": 0.02,
+      "theta_th": 65.0,
+      "nu": 12.0,
+      "rho": 1.2,
+      "tau_up_s": 3.0,
+      "tau_down_s": 6.0,
+      "q_cmp_base_tflops": 0.4,
+      "q_mem_base_gb": 15,
+      "H_swap_s": 2.5
+    },
+    "mid": {
+      "prototype": "Orin NX",
+      "count": 3,
+      "mu_baseline_tflops": 0.74,
+      "m_gb": 16.0,
+      "B_load_gbps": 1,
+      "gamma": 0.03,
+      "theta_th": 60.0,
+      "nu": 18.0,
+      "rho": 1.5,
+      "tau_up_s": 2.5,
+      "tau_down_s": 5.0,
+      "q_cmp_base_tflops": 0.2,
+      "q_mem_base_gb": 6,
+      "H_swap_s": 3
+    },
+    "low": {
+      "prototype": "Orin Nano",
+      "count": 4,
+      "mu_baseline_tflops": 0.4,
+      "m_gb": 8.0,
+      "B_load_gbps": 0.5,
+      "gamma": 0.04,
+      "theta_th": 60.0,
+      "nu": 25.0,
+      "rho": 1.8,
+      "tau_up_s": 2.0,
+      "tau_down_s": 4.5,
+      "q_cmp_base_tflops": 0.02,
+      "q_mem_base_gb": 0.1,
+      "H_swap_s": 4,
+      "_m_gb_comment": "Orin Nano Super is 8 GB, not 12. Memory feasibility is a hard DP constraint (Eq. 10d), so this changes which placements are legal."
+    }
+  },
+  "thermal": {
+    "_comment": "sensor_noise_var and process_noise_var both correspond to sigma_v^2 (paper Eq.11 uses same variance for both).",
+    "theta_amb_c": 25.0,
+    "sensor_noise_var": 0.5,
+    "process_noise_var": 0.5,
+    "T_W_sec": 1.0,
+    "_T_W_comment": "Fixed thermal discretization step T_W (seconds), decoupled from control window W. Defines zeta_n = 1 - exp(-T_W/tau_n). Physics ticks at this rate regardless of W_sec."
+  },
+  "_link_moved": "The `link` block used to live here and was DEAD: build_cluster populated Cluster.baseline_link from it and nothing ever read that field, so an M5a correction applied here changed no result. The live link constants are drift.network.{alpha_normal_s,beta_normal_s_per_byte}, which drift_gt turns into link_obs. cluster.py now reads the same source so there is exactly one."
+}
